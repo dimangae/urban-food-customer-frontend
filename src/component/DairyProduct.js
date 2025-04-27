@@ -8,6 +8,28 @@ import { useCart } from '../component/CartContext'; // Import CartContext hook
 
 export default function DairyProduct() {
   const { addToCart } = useCart(); // Access addToCart from CartContext
+  const [itemData, setItemData] = React.useState([]);
+  const [filteredDairyProducts, setFilteredDairyProducts] = React.useState([]);
+
+  React.useEffect(() => {
+    fetch('http://localhost:8080/api/products')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data)
+        setItemData(data);
+        const dairyProducts = data.filter(item => item.category === 'Dairy Products');
+        setFilteredDairyProducts(dairyProducts);
+      })
+      .catch(error => {
+        console.error('Error fetching Dairy Product:', error);
+      });
+    }, []);
+  
 
   return (
     <>
@@ -28,7 +50,7 @@ export default function DairyProduct() {
           margin: '50px auto',
         }}
       >
-        {itemData.map((item, index) => (
+        {filteredDairyProducts.map((item, index) => (
           <Box
             key={item.img}
             sx={{
@@ -43,8 +65,8 @@ export default function DairyProduct() {
             {/* Image */}
             <ImageListItem sx={{ width: '250px', height: '250px' }}>
               <img
-                src={`${item.img}?w=248&fit=crop&auto=format`}
-                alt={item.title}
+                src={`${item.imageUrl}?w=248&fit=crop&auto=format`}
+                alt={item.name}
                 loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -52,10 +74,11 @@ export default function DairyProduct() {
 
             {/* Description */}
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <Typography variant="body1"><strong>Food Name:</strong> {item.title}</Typography>
-              <Typography variant="body1"><strong>Category:</strong> Dairy Product</Typography>
-              <Typography variant="body1"><strong>Price:</strong> $10.99</Typography>
-              <Typography variant="body1"><strong>Stock:</strong> Available</Typography>
+              <Typography variant="body1"><strong>Food Name:</strong> {item.name}</Typography>
+              <Typography variant="body1"><strong>Category:</strong> {item.category}</Typography>
+              <Typography variant="body1"><strong>Price:</strong> {item.price}</Typography>
+              <Typography variant="body1"><strong>Stock:</strong> {item.stockQuantity > 0 ? 'Available' : 'Unavailable'}</Typography>
+              
               
               {/* Add to Cart Button */}
               <Box
@@ -74,10 +97,10 @@ export default function DairyProduct() {
                   }}
                   onClick={() => {
                     // Pass only the name and price to the cart
-                    addToCart({ name: item.title, price: 10.99 });
+                    addToCart({ name: item.name, price: item.price });
 
                     // Show alert message
-                    alert(`${item.title} has been added to the cart!`);
+                    alert(`${item.name} has been added to the cart!`);
                   }}
                 >
                   Add Cart
@@ -91,45 +114,45 @@ export default function DairyProduct() {
   );
 }
 
-const itemData = [
-  {
-    img: '/images/milk2.jpeg',
-    title: 'Milk',
-    author: '@bkristastucchio',
-  },
-  {
-    img: '/images/cheese3.jpeg',
-    title: 'Cheese',
-    author: '@rollelflex_graphy726',
-  },
-  {
-    img: '/images/Butter3.webp',
-    title: 'Butter',
-    author: '@helloimnik',
-  },
-  {
-    img: '/images/Yogurt4.jpeg',
-    title: 'Yogurt',
-    author: '@nolanissac',
-  },
-  {
-    img: '/images/SourCream1.jpeg',
-    title: 'Sour Cream',
-    author: '@hjrc33',
-  },
-  {
-    img: '/images/chocolate1.webp',
-    title: 'Chocolate Bars',
-    author: '@arwinneil',
-  },
-  {
-    img: '/images/Ghee1.jpg',
-    title: 'Ghee',
-    author: '@tjdragotta',
-  },
-  {
-    img: '/images/whippedcream1.webp',
-    title: 'Whipped Cream',
-    author: '@katie_wasserman',
-  },
-];
+// const itemData = [
+//   {
+//     img: '/images/milk2.jpeg',
+//     title: 'Milk',
+//     author: '@bkristastucchio',
+//   },
+//   {
+//     img: '/images/cheese3.jpeg',
+//     title: 'Cheese',
+//     author: '@rollelflex_graphy726',
+//   },
+//   {
+//     img: '/images/Butter3.webp',
+//     title: 'Butter',
+//     author: '@helloimnik',
+//   },
+//   {
+//     img: '/images/Yogurt4.jpeg',
+//     title: 'Yogurt',
+//     author: '@nolanissac',
+//   },
+//   {
+//     img: '/images/SourCream1.jpeg',
+//     title: 'Sour Cream',
+//     author: '@hjrc33',
+//   },
+//   {
+//     img: '/images/chocolate1.webp',
+//     title: 'Chocolate Bars',
+//     author: '@arwinneil',
+//   },
+//   {
+//     img: '/images/Ghee1.jpg',
+//     title: 'Ghee',
+//     author: '@tjdragotta',
+//   },
+//   {
+//     img: '/images/whippedcream1.webp',
+//     title: 'Whipped Cream',
+//     author: '@katie_wasserman',
+//   },
+// ];

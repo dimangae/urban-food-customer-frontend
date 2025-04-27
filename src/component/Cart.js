@@ -60,9 +60,9 @@ export default function CartPage() {
             <TableHead>
               <TableRow>
                 <TableCell><strong>Item Name</strong></TableCell>
-                <TableCell align="right"><strong>Price ($)</strong></TableCell>
+                <TableCell align="right"><strong>Price (Rs.)</strong></TableCell>
                 <TableCell align="right"><strong>Quantity</strong></TableCell>
-                <TableCell align="right"><strong>Total ($)</strong></TableCell>
+                <TableCell align="right"><strong>Total (Rs.)</strong></TableCell>
                 <TableCell align="right"></TableCell>
               </TableRow>
             </TableHead>
@@ -104,7 +104,7 @@ export default function CartPage() {
           }}
         >
           <Typography variant="h5" sx={{ color: 'Black' }}>
-            Total Cost: ${getTotalCost().toFixed(2)}
+            Total Cost: Rs.{getTotalCost().toFixed(2)}
           </Typography>
           <Button
             variant="contained"

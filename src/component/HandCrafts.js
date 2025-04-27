@@ -8,6 +8,29 @@ import { useCart } from '../component/CartContext'; // Import CartContext hook
 
 export default function HandCrafts() {
   const { addToCart } = useCart(); // Access addToCart from CartContext
+  const [itemData, setItemData] = React.useState([]);
+  const [filteredHandCrafts, setFilteredHandCrafts] = React.useState([]);
+
+  React.useEffect(() => {
+      fetch('http://localhost:8080/api/products')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch products');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data)
+          setItemData(data);
+          const handCrafts = data.filter(item => item.category === 'Hand Crafts');
+          setFilteredHandCrafts(handCrafts);
+        })
+        .catch(error => {
+          console.error('Error fetching Hand Crafts:', error);
+        });
+      }, []);
+    
+
 
   return (
     <>
@@ -28,7 +51,7 @@ export default function HandCrafts() {
           margin: '50px auto',
         }}
       >
-        {itemData.map((item, index) => (
+        {filteredHandCrafts.map((item, index) => (
           <Box
             key={item.img}
             sx={{
@@ -43,8 +66,8 @@ export default function HandCrafts() {
             {/* Image */}
             <ImageListItem sx={{ width: '250px', height: '250px' }}>
               <img
-                src={`${item.img}?w=248&fit=crop&auto=format`}
-                alt={item.title}
+                src={`${item.imageUrl}?w=248&fit=crop&auto=format`}
+                alt={item.name}
                 loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -52,10 +75,10 @@ export default function HandCrafts() {
 
             {/* Description */}
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <Typography variant="body1"><strong>Food Name:</strong> {item.title}</Typography>
-              <Typography variant="body1"><strong>Category:</strong> Hand Crafts</Typography>
-              <Typography variant="body1"><strong>Price:</strong> $10.99</Typography>
-              <Typography variant="body1"><strong>Stock:</strong> Available</Typography>
+              <Typography variant="body1"><strong>Food Name:</strong> {item.name}</Typography>
+              <Typography variant="body1"><strong>Category:</strong> {item.category}</Typography>
+              <Typography variant="body1"><strong>Price:</strong> {item.price}</Typography>
+              <Typography variant="body1"><strong>Stock:</strong> {item.stockQuantity > 0 ? 'Available' : 'Unavailable'}</Typography>
               
               {/* Add to Cart Button */}
               <Box
@@ -74,10 +97,10 @@ export default function HandCrafts() {
                   }}
                   onClick={() => {
                     // Pass only the name and price to the cart
-                    addToCart({ name: item.title, price: 10.99 });
+                    addToCart({ name: item.name, price: item.price });
 
                     // Show alert message
-                    alert(`${item.title} has been added to the cart!`);
+                    alert(`${item.name} has been added to the cart!`);
                   }}
                 >
                   Add Cart
@@ -91,46 +114,46 @@ export default function HandCrafts() {
   );
 }
 
-const itemData = [
-  {
-    img: '/images/Pottery1.jpg',
-    title: 'Pottery',
-    author: '@bkristastucchio',
-  },
-  {
-    img: '/images/spoon2.jpg',
-    title: 'Spoons',
-    author: '@rollelflex_graphy726',
-  },
-  {
-    img: '/images/hat3.jpeg',
-    title: 'Crochet Hat',
-    author: '@helloimnik',
-  },
-  {
-    img: '/images/scarf1.jpeg',
-    title: 'Crochet Scarf',
-    author: '@nolanissac',
-  },
-  {
-    img: '/images/candles1.webp',
-    title: 'Brownies',
-    author: '@hjrc33',
-  },
-  {
-    img: '/images/soap4.jpg',
-    title: 'Soap',
-    author: '@arwinneil',
-  },
-  {
-    img: '/images/bag1.jpg',
-    title: 'Leather Bag',
-    author: '@tjdragotta',
-  },
-  {
-    img: '/images/rugs1.jpg',
-    title: 'handwoven rugs',
-    author: '@katie_wasserman',
-  },
-];
+// const itemData = [
+//   {
+//     img: '/images/Pottery1.jpg',
+//     title: 'Pottery',
+//     author: '@bkristastucchio',
+//   },
+//   {
+//     img: '/images/spoon2.jpg',
+//     title: 'Spoons',
+//     author: '@rollelflex_graphy726',
+//   },
+//   {
+//     img: '/images/hat3.jpeg',
+//     title: 'Crochet Hat',
+//     author: '@helloimnik',
+//   },
+//   {
+//     img: '/images/scarf1.jpeg',
+//     title: 'Crochet Scarf',
+//     author: '@nolanissac',
+//   },
+//   {
+//     img: '/images/candles1.webp',
+//     title: 'Brownies',
+//     author: '@hjrc33',
+//   },
+//   {
+//     img: '/images/soap4.jpg',
+//     title: 'Soap',
+//     author: '@arwinneil',
+//   },
+//   {
+//     img: '/images/bag1.jpg',
+//     title: 'Leather Bag',
+//     author: '@tjdragotta',
+//   },
+//   {
+//     img: '/images/rugs1.jpg',
+//     title: 'handwoven rugs',
+//     author: '@katie_wasserman',
+//   },
+// ];
 

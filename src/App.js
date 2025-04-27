@@ -12,6 +12,7 @@ import Vegetable from './component/Vegetable';
 import DairyProduct from './component/DairyProduct';
 import BakedGoods from './component/BakedGoods';
 import HandCrafts from './component/HandCrafts';
+import CustomerRegister from './component/CustomerRegister';
 import { CartProvider } from './component/CartContext'; // Import CartProvider for global state
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/rating" element={<Rating />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/order" element={<Order />} />
+            <Route path="/customer-register" element={<CustomerRegister />} />
           </Routes>
         </div>
       </Router>

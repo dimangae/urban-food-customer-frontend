@@ -1,58 +1,77 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useNavigate and useLocation
-import { useState } from 'react'; // Import useState for validation
+import React, { useState } from 'react';
+import { Box, TextField, Typography, Button } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Order() {
-  const navigate = useNavigate(); // Initialize useNavigate
-  const location = useLocation(); // Access passed data from CartPage
-  const { cartItems, totalPrice } = location.state || { cartItems: [], totalPrice: 0 }; // Retrieve state
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { cartItems, totalPrice } = location.state || { cartItems: [], totalPrice: 0 };
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    no: '',
-    city: '',
-    street: '',
-  }); // Store form values
+  const [nicNumber, setNicNumber] = useState('');
+  const [customerId, setCustomerId] = useState(''); // New state for Customer ID
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [nicError, setNicError] = useState('');
+  const [error, setError] = useState('');
+  const [userExists, setUserExists] = useState(true);
 
-  const [errors, setErrors] = useState({}); // Store validation errors
-
-  // Handle input change
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
+  // Handle NIC number changes
+  const handleNicChange = (e) => {
+    setNicNumber(e.target.value);
+    setNicError('');
+    setCustomerId(''); // Clear Customer ID when NIC changes
+    setShippingAddress(''); // Clear Address when NIC changes
   };
 
-  // Validate fields
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
-    if (!formData.phone) newErrors.phone = 'Phone number is required';
-    else if (!/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Phone number must be 10 digits';
-    if (!formData.no) newErrors.no = 'House/Apartment No is required';
-    if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.street) newErrors.street = 'Street is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+  // Handle Address input changes
+  const handleAddressChange = (e) => {
+    setShippingAddress(e.target.value);
+  };
+
+  // Check NIC number in the database and fetch Customer ID and Address
+  const checkNIC = async () => {
+    if (!nicNumber.trim()) {
+      setNicError('NIC number is required');
+      return;
+    }
+
+    if (!/^[0-9]{9}[Vv]?$/.test(nicNumber) && !/^[0-9]{12}$/.test(nicNumber)) {
+      setNicError('Invalid NIC format');
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/customers/findByNic?nic=" + nicNumber);
+      if (response.ok) {
+        const data = await response.json();
+        setCustomerId(data.id); // Set Customer ID from the response
+        setShippingAddress(data.address); // Set Address from the response
+        setUserExists(true);
+      } else {
+        setUserExists(false); // NIC not found in the database
+        setCustomerId(''); // Clear Customer ID
+        setShippingAddress(''); // Clear Address
+      }
+    } catch (error) {
+      console.error('Error fetching customer details:', error);
+      setUserExists(false);
+    }
   };
 
   // Handle form submission
   const handleSubmit = () => {
-    if (validate()) {
-      // Navigate to Payment page if validation passes
-      navigate('/Payment', {
-        state: { cartItems, totalPrice },
-      });
+    if (!userExists) {
+      alert('NIC number not found. Please register before placing an order.');
+      return;
     }
+
+    if (!shippingAddress.trim()) {
+      setError('Shipping address is required');
+      return;
+    }
+
+    navigate('/Payment', {
+      state: { cartItems, totalPrice, nicNumber, customerId, shippingAddress },
+    });
   };
 
   return (
@@ -82,9 +101,8 @@ export default function Order() {
       <Box
         component="form"
         sx={{
-          '& .MuiTextField-root': { m: 1, width: '25ch' },
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)', // Two columns for text fields
+          display: 'flex',
+          flexDirection: 'column',
           gap: 2,
           alignItems: 'center',
           marginLeft: '50px',
@@ -93,74 +111,64 @@ export default function Order() {
         autoComplete="off"
       >
         {/* Headline */}
-        <Typography
-          variant="h4"
-          sx={{
-            gridColumn: 'span 2',
-            textAlign: 'center',
-            marginBottom: '20px',
-          }}
-        >
-          Delivery Details
+        <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px', marginTop: '20px' }}>
+          Order Details
         </Typography>
 
-        {/* Delivery Details Section */}
+        {/* NIC Number Input */}
         <TextField
-          id="name"
-          label="Name"
-          value={formData.name}
-          onChange={handleChange}
-          error={!!errors.name}
-          helperText={errors.name}
-        />
-        <TextField
-          id="email"
-          label="Email"
-          value={formData.email}
-          onChange={handleChange}
-          error={!!errors.email}
-          helperText={errors.email}
-        />
-        <TextField
-          id="phone"
-          label="Phone No"
-          value={formData.phone}
-          onChange={handleChange}
-          error={!!errors.phone}
-          helperText={errors.phone}
-        />
-        <TextField
-          id="no"
-          label="No"
-          value={formData.no}
-          onChange={handleChange}
-          error={!!errors.no}
-          helperText={errors.no}
-        />
-        <TextField
-          id="city"
-          label="City"
-          value={formData.city}
-          onChange={handleChange}
-          error={!!errors.city}
-          helperText={errors.city}
-        />
-        <TextField
-          id="street"
-          label="Street"
-          value={formData.street}
-          onChange={handleChange}
-          error={!!errors.street}
-          helperText={errors.street}
+          id="nicNumber"
+          label="NIC Number"
+          value={nicNumber}
+          onChange={handleNicChange}
+          onBlur={checkNIC} // Call function when user enters NIC and moves out of input field
+          error={!!nicError}
+          helperText={nicError}
+          sx={{ width: '500px', marginBottom: '20px' }}
         />
 
-        {/* Button */}
+        {/* Customer ID Input */}
+        <TextField
+          id="customerId"
+          label="Customer ID"
+          value={customerId}
+          InputProps={{ readOnly: true }} // Customer ID field is read-only
+          sx={{ width: '500px', marginBottom: '20px' }}
+        />
+
+        {/* Shipping Address Input */}
+        <TextField
+          id="shippingAddress"
+          label="Shipping Address"
+          value={shippingAddress}
+          onChange={handleAddressChange}
+          error={!!error}
+          helperText={error}
+          disabled={!userExists} // Disable if user is not found in DB
+          sx={{ width: '500px', marginBottom: '20px' }}
+        />
+
+        {/* Error message if NIC is not found */}
+        {!userExists && (
+          <Typography variant="body1" sx={{ textAlign: 'center', color: 'red', fontWeight: 'bold', marginBottom: '20px' }}>
+            NIC not found. Please register before placing an order.<a href="/customer-register" style={{ color: 'blue', textDecoration: 'underline' }}> Register </a>
+          </Typography>
+        )}
+
+        {/* Cash on Delivery Note */}
+        <Typography variant="body1" sx={{ textAlign: 'center', color: 'red', fontWeight: 'bold', marginBottom: '20px' }}>
+          Note: This shop only accepts cash on delivery.
+        </Typography>
+
+        {/* Submit Button */}
         <Button
           variant="contained"
-          onClick={handleSubmit} // Call handleSubmit on button click
+          onClick={handleSubmit}
+          disabled={!userExists} // Disable order if NIC is not found
           sx={{
-            gridColumn: 'span 2',
+            width: '300px',
             marginTop: '20px',
+            marginBottom: '20px',
             backgroundColor: 'maroon',
             color: 'white',
             '&:hover': {
@@ -171,6 +179,6 @@ export default function Order() {
           Add Order
         </Button>
       </Box>
-    </Box>
-  );
+    </Box>
+  );
 }

@@ -8,6 +8,27 @@ import { useCart } from '../component/CartContext'; // Import CartContext hook
 
 export default function BakedGoods() {
   const { addToCart } = useCart(); // Access addToCart from CartContext
+  const [itemData, setItemData] = React.useState([]);
+  const [filteredBakedGoods, setFilteredBakedGoods] = React.useState([]);
+
+  React.useEffect(() => {
+      fetch('http://localhost:8080/api/products')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch products');
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(data)
+          setItemData(data);
+          const BakedGoods = data.filter(item => item.category === 'Baked Goods');
+          setFilteredBakedGoods(BakedGoods);
+        })
+        .catch(error => {
+          console.error('Error fetching Baked Goods:', error);
+        });
+      }, []);
 
   return (
     <>
@@ -28,7 +49,7 @@ export default function BakedGoods() {
           margin: '50px auto',
         }}
       >
-        {itemData.map((item, index) => (
+        {filteredBakedGoods.map((item, index) => (
           <Box
             key={item.img}
             sx={{
@@ -42,9 +63,9 @@ export default function BakedGoods() {
           >
             {/* Image */}
             <ImageListItem sx={{ width: '250px', height: '250px' }}>
-              <img
-                src={`${item.img}?w=248&fit=crop&auto=format`}
-                alt={item.title}
+              <img 
+                src={`${item.imageUrl}?w=248&fit=crop&auto=format`}
+                alt={item.name}
                 loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -52,10 +73,11 @@ export default function BakedGoods() {
 
             {/* Description */}
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <Typography variant="body1"><strong>Food Name:</strong> {item.title}</Typography>
-              <Typography variant="body1"><strong>Category:</strong> Baked Goods</Typography>
-              <Typography variant="body1"><strong>Price:</strong> $10.99</Typography>
-              <Typography variant="body1"><strong>Stock:</strong> Available</Typography>
+              <Typography variant="body1"><strong>Food Name:</strong> {item.name}</Typography>
+              <Typography variant="body1"><strong>Category:</strong> {item.category}</Typography>
+              <Typography variant="body1"><strong>Price:</strong> {item.price}</Typography>
+              <Typography variant="body1"><strong>Stock:</strong> {item.stockQuantity > 0 ? 'Available' : 'Unavailable'}</Typography>
+              
               
               {/* Add to Cart Button */}
               <Box
@@ -74,10 +96,10 @@ export default function BakedGoods() {
                   }}
                   onClick={() => {
                     // Pass only the name and price to the cart
-                    addToCart({ name: item.title, price: 10.99 });
+                    addToCart({ name: item.name, price: item.price });
 
                     // Show alert message
-                    alert(`${item.title} added to cart!`);
+                    alert(`${item.name} has been added to the cart!`);
                   }}
                 >
                   Add Cart
@@ -91,46 +113,46 @@ export default function BakedGoods() {
   );
 }
 
-const itemData = [
-  {
-    img: '/images/BakedGoods4.jpeg',
-    title: 'Breads',
-    author: '@bkristastucchio',
-  },
-  {
-    img: '/images/cake2.jpeg',
-    title: 'Cakes',
-    author: '@rollelflex_graphy726',
-  },
-  {
-    img: '/images/Cookies1.jpg',
-    title: 'Cookies',
-    author: '@helloimnik',
-  },
-  {
-    img: '/images/Muffins1.jpg',
-    title: 'Muffins',
-    author: '@nolanissac',
-  },
-  {
-    img: '/images/Brownies2.jpg',
-    title: 'Brownies',
-    author: '@hjrc33',
-  },
-  {
-    img: '/images/Doughnuts2.jpg',
-    title: 'Doughnuts',
-    author: '@arwinneil',
-  },
-  {
-    img: '/images/Biscuits1.jpg',
-    title: 'Biscuits',
-    author: '@tjdragotta',
-  },
-  {
-    img: '/images/Pastries2.jpg',
-    title: 'Pastries',
-    author: '@katie_wasserman',
-  },
-];
+// const itemData = [
+//   {
+//     img: '/images/BakedGoods4.jpeg',
+//     title: 'Breads',
+//     author: '@bkristastucchio',
+//   },
+//   {
+//     img: '/images/cake2.jpeg',
+//     title: 'Cakes',
+//     author: '@rollelflex_graphy726',
+//   },
+//   {
+//     img: '/images/Cookies1.jpg',
+//     title: 'Cookies',
+//     author: '@helloimnik',
+//   },
+//   {
+//     img: '/images/Muffins1.jpg',
+//     title: 'Muffins',
+//     author: '@nolanissac',
+//   },
+//   {
+//     img: '/images/Brownies2.jpg',
+//     title: 'Brownies',
+//     author: '@hjrc33',
+//   },
+//   {
+//     img: '/images/Doughnuts2.jpg',
+//     title: 'Doughnuts',
+//     author: '@arwinneil',
+//   },
+//   {
+//     img: '/images/Biscuits1.jpg',
+//     title: 'Biscuits',
+//     author: '@tjdragotta',
+//   },
+//   {
+//     img: '/images/Pastries2.jpg',
+//     title: 'Pastries',
+//     author: '@katie_wasserman',
+//   },
+// ];
 

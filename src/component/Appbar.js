@@ -131,7 +131,9 @@ export default function Appbar() {
             <Link to="/cart" style={{ color: 'inherit' }} aria-label="cart">
               <ShoppingCartCheckoutIcon sx={{ mr: 2 }} />
             </Link>
-            <LoginIcon sx={{ mr: 2 }} aria-label="login" />
+            <Link to="/customer-register" style={{ color: 'inherit' }} aria-label="register">
+              <LoginIcon sx={{ mr: 2 }} aria-label="register" />
+            </Link>            
             <Link to="/rating" style={{ color: 'inherit' }} aria-label="rating">
               <RateReviewIcon />
             </Link>
